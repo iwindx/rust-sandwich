@@ -1,11 +1,11 @@
 pub(crate) mod parse {
     use ethers::{abi::AbiDecode, contract::AbiError, prelude::*};
     use eyre::Result;
-
     // Abigen creates a SwapExactTokensForTokensCall struct that can be used to decode
     // the call data for the swapExactTokensForTokens function in the IUniswapV2Router02 contract
     abigen!(IPancakeV2RouterABI, "src/abi/IPancakeV2Router02.json");
-    #[derive()]
+
+
     pub struct TxInput {
         pub amount_out_min: U256,
         pub path: [Address; 2],
@@ -32,3 +32,4 @@ pub(crate) mod parse {
         })
     }
 }
+
