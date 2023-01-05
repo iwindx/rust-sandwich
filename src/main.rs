@@ -4,10 +4,10 @@ use ethers::prelude::*;
 use ethers::utils::format_units;
 use eyre::Result;
 use std::fmt;
-use std::sync::Arc;
 use lib::numeric::numeric::*;
 use lib::parse::*;
 use lib::swapv2::*;
+use lib::constants::constants::*;
 
 
 impl fmt::Debug for SandwichState {
@@ -17,27 +17,20 @@ impl fmt::Debug for SandwichState {
 }
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
-    let client = Provider::<Ws>::connect(
-        "wss://ws-nd-624-743-149.p2pify.com/cea7fca36c7c64f53243ef5739238251",
-    )
-    .await?;
-    println!("client.get_chainid(): {:?}", client.get_gas_price().await?);
-    let client = Arc::new(client);
-
+    let client = get_wss_client().await;
+    
     let mut tx_stream = client
         .subscribe_pending_txs()
         .await?
         .transactions_unordered(256);
-    let address = "0x10ed43c718714eb63d5aa57b78b54704e256024e".parse::<Address>()?;
+
+    println!(":{:?}",  tx_stream.next().await);
+
+    let address = get_swap_config().router;
+
     loop {
         if let Some(Ok(tx)) = tx_stream.next().await {
             if tx.to == Some(address) {
-                // let hash = H256::from_str(
-                //     "0x24574a25938c95d6b9313059bc78ad6a3f84a25dc9dc9b57a3adf0bf0307dfb2",
-                // )?;
-                // let transaction = client.get_transaction(hash).await?;
-
-                // if let Some(tx) = transaction {
                 let router_data_decoded = parse::parse_router_tx(tx.input.clone());
                 if !router_data_decoded.is_err() {
                     let parse::TxInput {
@@ -46,6 +39,7 @@ async fn main() -> Result<()> {
                         deadline,
                         ..
                     } = router_data_decoded.unwrap();
+                    println!("Sent tx: {}\n", serde_json::to_string(&tx)?);
 
                     let dt = Utc::now().timestamp_millis() / 1000;
 
@@ -89,7 +83,6 @@ async fn main() -> Result<()> {
                     }
                     println!("get_block_number: {}", client.get_block_number().await?);
                     println!("optima_weth_in: {}, ", optima_weth_in);
-                    println!("Sent tx: {}\n", serde_json::to_string(&tx)?);
                     println!("path: {:?}", path);
                     println!(
                         "\n目标交易 : {:?}\n optimalWethIn: {:?}\n 本次预计卖出费用: {:?}\n",
@@ -97,10 +90,11 @@ async fn main() -> Result<()> {
                         format_units(optima_weth_in, "ether"),
                         format_units(sandwich_states.backrun.amount_out, "ether"),
                     );
+                    panic!("结束");
                     
                 }
-                // }
             }
-        }
+        } 
     }
+    // Ok(())
 }

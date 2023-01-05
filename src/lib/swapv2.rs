@@ -9,7 +9,8 @@ pub(crate) mod swapv2 {
         pub new_reserve_a: U256,
         pub new_reserve_b: U256,
     }
-    use crate::lib::constants::constants::get_v2_pair_contract;
+    use crate::lib::constants::constants::{get_v2_pair_contract, get_swap_config};
+
     impl fmt::Debug for DataGivenIn {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(
@@ -19,7 +20,6 @@ pub(crate) mod swapv2 {
             )
         }
     }
-    // pub fn getExactWethTokenMinRecv(finalMinRecv: U256, path: [Address; 2]) {}
 
     pub fn sort_tokens(token_a: Address, token_b: Address) -> [Address; 2] {
         if token_a.lt(&token_b) {
@@ -55,16 +55,7 @@ pub(crate) mod swapv2 {
 
         let salt = keccak256(&calldata);
 
-        let code = Bytes::from(
-            hex::decode("00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5")
-                .unwrap(),
-        );
-
-        let factory: Address = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
-            .parse()
-            .unwrap();
-
-        get_create2_address_from_hash(factory, salt.to_vec(), code)
+        get_create2_address_from_hash(get_swap_config().factory, salt.to_vec(),get_swap_config().init_code_hash)
     }
 
     pub fn get_data_given_in(amount_in: U256, reserve_a: U256, reserve_b: U256) -> DataGivenIn {
