@@ -13,7 +13,7 @@ pub(crate) mod parse {
         pub deadline: U256,
     }
 
-    pub fn parse_router_tx(tx_data: Bytes) -> Result<TxInput, AbiError> {
+    pub fn parse_router_tx(tx_data: &Bytes) -> Result<TxInput, AbiError> {
         let _decoded: Result<SwapExactETHForTokensCall, AbiError> =
             SwapExactETHForTokensCall::decode(&tx_data);
 

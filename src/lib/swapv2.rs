@@ -1,15 +1,16 @@
 pub(crate) mod swapv2 {
+    use crate::lib;
 
-    use std::ops::{Add, Div, Mul, Sub};
-    use std::fmt;
     use ethers::{abi::Tokenizable, prelude::*, utils::*};
+    use lib::constants::constants::{get_swap_config, get_v2_pair_contract};
+    use std::fmt;
+    use std::ops::{Add, Div, Mul, Sub};
 
     pub struct DataGivenIn {
         pub amount_out: U256,
         pub new_reserve_a: U256,
         pub new_reserve_b: U256,
     }
-    use crate::lib::constants::constants::{get_v2_pair_contract, get_swap_config};
 
     impl fmt::Debug for DataGivenIn {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -55,7 +56,11 @@ pub(crate) mod swapv2 {
 
         let salt = keccak256(&calldata);
 
-        get_create2_address_from_hash(get_swap_config().factory, salt.to_vec(),get_swap_config().init_code_hash)
+        get_create2_address_from_hash(
+            get_swap_config().factory,
+            salt.to_vec(),
+            get_swap_config().init_code_hash,
+        )
     }
 
     pub fn get_data_given_in(amount_in: U256, reserve_a: U256, reserve_b: U256) -> DataGivenIn {
